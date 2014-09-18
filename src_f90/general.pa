@@ -1,0 +1,35 @@
+      integer jmax, kmax, ntmax, n_vol, num_nt, nphfield, num_temp_max
+      integer num_a
+      integer nfmax, n_gg, n_ref, nmumax, nphomax, nphlcmax, nregmax
+      integer ucens, iucens, ducens
+      integer int_ans_size, double_ans_size
+      integer randmax
+      double precision pi, rad_cp, c_light, df_implicit, df_T
+      parameter (ucens = 5000000)
+      parameter (iucens = 30000000)
+      parameter (ducens = 30000000)
+      parameter (jmax = 36)
+      parameter (kmax = 36)
+      parameter (ntmax = 100)
+      parameter (n_vol = 400)
+      parameter (num_nt = 200)
+      parameter (nphfield = 400)
+      parameter (num_temp_max = 700)
+      parameter (nfmax = 500)
+      parameter (n_gg = 100)
+      parameter (n_ref = 500)
+      parameter (nmumax = 32)
+      parameter (nphomax = 128)
+      parameter (nphlcmax = 10)
+      parameter (nregmax = 5)
+      parameter (num_a=18)
+      parameter (rad_cp = 3.333564097d-11)
+      parameter (pi = 3.1415926536d0)
+      parameter (c_light = 2.9979245620d10)
+      parameter (df_implicit = 4.d-2)
+      parameter (df_T = 2.5d-1)
+      parameter (int_ans_size = 2)
+      parameter (double_ans_size = 5)
+      parameter (randmax = 10000)
+
+

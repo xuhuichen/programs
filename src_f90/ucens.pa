@@ -1,0 +1,4 @@
+      integer ucens, iucens, ducens
+      parameter (ucens = 5000000)
+      parameter (iucens = 30000000)
+      parameter (ducens = 30000000)
