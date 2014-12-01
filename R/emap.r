@@ -1,0 +1,2 @@
+setEPS()
+postscript("test.eps")
