@@ -4,7 +4,7 @@
 FC = mpif90 -traceback
 
 # FFLAGS = -O2
-# FFLAGS = -O2 -axW -132
+# FFLAGS = -O2  -132
 
 F1 = compton2d.f90 \
 	reader.f90 \

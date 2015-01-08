@@ -1,6 +1,6 @@
 !     common blocks used in updated.f, imctrk2d.f, imcgen.f, xec2d.f, record.f
       integer ndxout
-      integer cf_sentinel, nr, nz, ncycle, pair_switch
+      integer nt_ramp, nr, nz, ncycle, pair_switch
       integer ierr, myid, numprocs, master
       integer jph, kph ,jgpsp, jgplc, jgpmu, emitype
       integer nsurfu(kmax), nsurfl(kmax), nsurfo(jmax), nsurfi(jmax),&
@@ -35,7 +35,7 @@
       double precision split1, spl3_trg
       double precision r_flare, z_flare, t_flare, sigma_r, &
      &                 sigma_z, sigma_t, flare_amp
-      double precision acc_prob
+      double precision acc_prob, acc_prob_local(jmax,kmax)
       double precision amxwl(jmax, kmax), gmin(jmax, kmax),&
      &                 gmax(jmax, kmax), p_nth(jmax, kmax),&
      &                 gbar_nth(jmax, kmax), N_nth(jmax, kmax)
@@ -125,7 +125,7 @@
       real etotal, etotal_old
 
       common / ndx / ndxout
-      common / i_flare / cf_sentinel
+      common / n_acc / nt_ramp
       common / nc / ncycle
       common / izones / nz, nr
       common / ps / pair_switch
@@ -201,7 +201,7 @@
       common / inj / inj_g1, inj_g2, inj_p, inj_t, inj_gg,&
      &               inj_sigma, inj_L, inj_v, g_bulk, pick_rate, pick_dis
       common / anis / theta_b, theta_local
-      common / escacc / r_esc, r_acc_peak, r_acc, acc_prob
+      common / escacc / r_esc, r_acc_peak, r_acc, acc_prob, acc_prob_local
       common / extrad / R_blr, fr_blr, R_ir, fr_ir, R_disk, d_jet
       common / fic / F_IC
       common / d_update / Te_new, dt_new, lnL, dT_max

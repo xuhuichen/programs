@@ -70,7 +70,7 @@
 !     common block eweights
       call MPI_BCAST(ewsurfi, jmax, MPI_DOUBLE_PRECISION, master, &
      &      MPI_COMM_WORLD, ierr)
-      call MPI_BCAST(ewsurfo, jmax*ntmax, MPI_DOUBLE_PRECISION, master, &
+      call MPI_BCAST(ewsurfo, jmax, MPI_DOUBLE_PRECISION, master, &
      &      MPI_COMM_WORLD, ierr)
 !     common block energy
       call MPI_BCAST(hu, nphomax+1, MPI_DOUBLE_PRECISION, master, &
@@ -296,7 +296,7 @@
 !     common block eweights
       call MPI_BCAST(ewsurfu, jmax, MPI_DOUBLE_PRECISION, master, &
      &      MPI_COMM_WORLD, ierr)
-      call MPI_BCAST(ewsurfl, jmax*ntmax, MPI_DOUBLE_PRECISION, master, &
+      call MPI_BCAST(ewsurfl, jmax, MPI_DOUBLE_PRECISION, master, &
      &      MPI_COMM_WORLD, ierr)
 !
 !

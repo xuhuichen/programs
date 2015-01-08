@@ -82,7 +82,7 @@
 !     particle diffusion
       double precision diff_z(0:jmax,kmax,num_nt),diff_r(jmax,kmax,num_nt), escape_total,var_scale,&
      &                 grad_ne(num_nt), fnt_tot(num_nt), ne_tot, ne_ave
-      double precision r_acc_copy(jmax,kmax), fibran
+      double precision r_acc_copy(jmax,kmax), fibran, acc_ramp, acc_max(jmax,kmax)
 !
 
 !     variables common from outside modified by update.
@@ -256,23 +256,59 @@
       endif
 !     end of calculating diffusion
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      nr_acc=2
+      nz_acc=2
+      acc_ramp = dexp(1.d0/nt_ramp)  !1.5d0**(1.d0/12.d0)
+      acc_max(:,:) = 4.d2*r_acc_peak
       if(turb_sw.eq.1)then
+       if(mod(ncycle-1,nt_ramp).eq.0)then
 !       single zones in the center have random chance to accelerate
-        r_acc(:,:)=1.d40
-        nr_acc=2
-        nz_acc=2
-        do j=1,nz-nz_acc+1
-          if(fibran().lt.acc_prob)then
+!        r_acc(:,:)=dmin1(r_acc(:,:)*acc_ramp,acc_max(:,:))
+        r_acc(:,:) = 0.5d2*r_acc_peak
+        do j=1,nz-nz_acc+1,nz_acc
+          if(fibran().lt.acc_prob_local(j,1))then
             do j_acc=j,j+nz_acc-1
               do k=1,nr_acc
-                r_acc(j_acc,k)=1/(1/r_acc(j_acc,k)+1/r_acc_peak)
+                r_acc(j_acc,k)=1/(1/r_acc(j_acc,k)+1/r_acc_peak/2.d0)
                 write(*,*)'r_acc(j,k)=',j_acc,k,r_acc(j_acc,k)
               enddo
             enddo
           endif
         enddo
+       elseif(mod(ncycle-1,nt_ramp).lt.nt_ramp/2)then
+          r_acc(:,:)=r_acc(:,:)/acc_ramp
+       elseif(mod(ncycle-1,nt_ramp).gt.nt_ramp/2)then
+          r_acc(:,:)=r_acc(:,:)*acc_ramp
+       endif
+
+      elseif(turb_sw.eq.3)then
+        r_acc(:,:) = r_acc(:,:)*acc_ramp
+        r_acc(:,:)=dmin1(r_acc(:,:),acc_max(:,:))
+        do j=1,nz-nz_acc+1
+          if(fibran().lt.acc_prob_local(j,1))then
+            do j_acc=j,j+nz_acc-1
+              do k=1,nr_acc
+                r_acc(j_acc,k)=1./(1./r_acc(j_acc,k)+1./r_acc_peak)
+                write(*,*)'r_acc(j,k)=',j_acc,k,r_acc(j_acc,k)
+              enddo
+            enddo
+          endif
+        enddo
+
+
+!     random accelerations are everywhere
+      elseif(turb_sw.eq.2)then
+        r_acc(:,:)=1.d40
+        do j_acc=1,nz
+           do k=1,nr
+              if(fibran().lt.acc_prob_local(j_acc,k))then
+                r_acc(j_acc,k)= 1/(1/r_acc(j_acc,k)+1/r_acc_peak)
+                write(*,*)'r_acc(j,k)=',j_acc,k,r_acc(j_acc,k)
+              endif
+           enddo
+        enddo
 !     begin random jumping of the accelerating zones, 1D
-      else if(turb_sw.eq.2)then
+      else if(turb_sw.eq.9)then
         do j=1,nz
            if(r_acc(j,1).lt.1.d30)then
               nzacc_min=j
@@ -817,19 +853,7 @@
           zmid = 5.d-1*(z(j) + zmin)
        endif
 !
-       if (cf_sentinel.eq.1) then
-          y = 5.d-1*(((rmid - r_flare)/sigma_r)**2.d0&
-     &             + ((zmid - z_flare)/sigma_z)**2.d0&
-     &             + ((time - t_flare)/sigma_t)**2.d0)
-!
-         if (y.lt.1.d2) then
-            tl_flare = flare_amp/dexp(y)
-         else
-            tl_flare = 0.d0
-         endif
-       else
-         tl_flare = 0.d0
-       endif
+       tl_flare = 0.d0
 !
        tlev = turb_lev(j,k) + tl_flare
        Tp_flare = tna(j,k)*(1.d0 + tl_flare)
@@ -1114,19 +1138,8 @@
                zmid = 5.d-1*(z(j) + zmin)
             endif
 !
-            if (cf_sentinel.eq.1) then
-               y = 5.d-1*(((rmid - r_flare)/sigma_r)**2.d0&
-     &                  + ((zmid - z_flare)/sigma_z)**2.d0&
-     &                  + ((time - t_flare)/sigma_t)**2.d0)
-!
-               if (y.lt.1.d2) then
-                  tl_flare = flare_amp/dexp(y)
-               else
-                  tl_flare = 0.d0
-               endif
-            else
-               tl_flare = 0.d0
-            endif
+
+            tl_flare = 0.d0
 !
             tlev = turb_lev(j,k) + tl_flare
             fdg_A = pi*(q_turb(j,k) - 1.d0)*(Omega**(2.d0 &
@@ -1548,12 +1561,13 @@
      &         .or.(pick_sw.eq.3.and.j.eq.(nz/6+1).and.k.le.nr*2/3) &
 !     1         .or.(pick_sw.eq.3.and.j.eq.(nz/6+1))&
      &         .or.(pick_sw.eq.4.and.(j.eq.nz/2+1.or.j.eq.nz/2).and.k.le.2)&
-     &         .or.(pick_sw.eq.5.and.r_acc(j,k).lt.1.e35))then
+     &         .or.(pick_sw.eq.5.and.r_acc(j,k).lt.dexp(1.d0)*r_acc_peak))then
 !          particle sweep at the lower boundary
                inj_rho = sweep*d_t
            else
              inj_rho = 0.d0
            endif
+           if(pick_sw.eq.5)inj_rho = inj_rho*r_acc_peak/r_acc(j,k)
            if(inj_switch.eq.6.and.k.le.int(sigma_r/dr+0.5d0))then
              if((time+t_fp-inj_t).gt.(j-1)*dz/inj_v.and.&
      &       (time+t_fp-inj_t).lt.(j-1+int(sigma_z/dz+0.5d0))*dz/inj_v)then
@@ -2011,19 +2025,8 @@
                zmid = 5.d-1*(z(j) + zmin)
             endif
 !
-            if (cf_sentinel.eq.1) then
-               y = 5.d-1*(((rmid - r_flare)/sigma_r)**2.d0&
-     &                  + ((zmid - z_flare)/sigma_z)**2.d0&
-     &                  + ((time - t_flare)/sigma_t)**2.d0)
-!
-               if (y.lt. 1.d2) then
-                  tl_flare = flare_amp/dexp(y)
-               else
-                  tl_flare = 0.d0
-               endif
-            else
-               tl_flare = 0.d0
-            endif
+
+            tl_flare = 0.d0
             tlev = turb_lev(j,k) + tl_flare
 !
             Tp_flare = tna(j,k)*(1.d0 + tl_flare)
@@ -2274,6 +2277,9 @@
       call MPI_REDUCE(hr_st_total, E_temp, 1, MPI_DOUBLE_PRECISION,&
      &     MPI_SUM, master, MPI_COMM_WORLD, ierr)
       if(myid.eq.master) hr_st_total = E_temp
+
+      !call MPI_barrier(MPI_COMM_WORLD, ierr) ! synchronization
+
 !
 !     end of E_add_up
       return

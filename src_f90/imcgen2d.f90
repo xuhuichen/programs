@@ -25,7 +25,7 @@
       double precision g_av, Th_e, N_e_nt, f_rel_br
       double precision kgg_calc, int_sy, McDonald
       double precision gamma_bar
-      double precision Eloss_pa
+      double precision Eloss_pa, tau_integ
       real etime, elapse(2), et0
 
 !
@@ -249,6 +249,7 @@
 !          the thickness of the flare is translated, and rounded to number of vertical zones.
             B_field(j,k) = B_input(j,k)
             theta_local(j,k)=theta_b(j,k)
+            acc_prob_local(j,k)=acc_prob
 !------------------------------------------------------------------
             if(inj_switch.ne.0.and.k.le.int(sigma_r/dr+0.5d0).and. &
      &          (time-inj_t).gt.(j-1)*dz/inj_v.and.&
@@ -283,6 +284,9 @@
                 theta_local(j,k)=75.d0/180*pi
                 write(*,*)'During flares, theta=',theta_local(j,k),'j=',j
                 B_field(j,k) = B_input(j,k)*dsin(theta_b(j,k))/dsin(theta_local(j,k))
+              elseif(inj_switch.eq.7)then
+                acc_prob_local(j,k) = dmin1(acc_prob_local(j,k)*flare_amp,1.d0)
+                write(*,*)'During flares, acc_prob=',acc_prob_local(j,k),'j=',j
               endif
             endif
 !--------------------------------------------------------------------------
@@ -464,6 +468,16 @@
       close(17)
       close(18)
       close(19)
+
+!       calculate the optical depth across the region from bottom center
+!       to top center.
+        i = 41
+          tau_integ = kappa_tot(i,1,1)*z(1)
+          do j =2 ,nz
+            tau_integ = tau_integ + kappa_tot(i,j,1)*(z(j)-z(j-1))
+          enddo
+          if(tau_integ.gt.1.)write(*,*)'tau_integ = ', tau_integ,'at i=',i
+        
 !
 !
 !      Calculate total input energy
@@ -486,7 +500,7 @@
       write(4,55) bingo
 !
 !     less photons are needed for the electron preparation phase
-      if(inj_switch.ne.0.and.time.lt.(inj_t-2.5d0*dmax1(z(nz),2*r(nr))/c_light))then
+      if(inj_switch.ne.0.and.time.lt.(inj_t-5.d0*dmax1(z(nz),2*r(nr))/c_light))then
         nst_local = nst/30
         write(*,*)'Electron preparation, nst_local =',nst_local
       else

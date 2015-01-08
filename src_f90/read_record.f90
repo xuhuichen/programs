@@ -19,7 +19,7 @@
 !
 !       integral variables
         read(nunit_misc,'(i10)')ndxout
-        read(nunit_misc,'(5i10)')cf_sentinel,nr,nz,ncycle,pair_switch
+        read(nunit_misc,'(5i10)')nt_ramp,nr,nz,ncycle,pair_switch
 
         do j=1,nz
           read(nunit_misc,'(2i10)')nsurfo(j), nsurfi(j)

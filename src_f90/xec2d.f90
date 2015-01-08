@@ -33,7 +33,7 @@
       if(myid.eq.master) then
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
        write(*,*) 'compton2d_volpara'
-      etotal = 0
+      etotal = 0.
       do 50 i = 1, num_nt
  50   nelectron(i) = 0
       nunit_evt = myid+1000
@@ -189,9 +189,9 @@
 !
       if ((fp_sw.ne.0).and.(ncycle.gt.0))&
      & call update
-!      write(*,*) 'myid=', myid, ' called update'
+      write(*,*) 'myid=', myid, ' called update'
       call graphics_collect
-!      write(*,*) 'myid=',myid,' af graphics_collect'
+      write(*,*) 'myid=',myid,' af graphics_collect'
 !
 !
 !
@@ -314,9 +314,9 @@
       call MPI_BCAST(time, 1, MPI_DOUBLE_PRECISION, master, &
      &      MPI_COMM_WORLD, ierr)
 !     broadcast elapsed times
-      call MPI_BCAST(etotal, 1, MPI_DOUBLE_PRECISION, master, &
+      call MPI_BCAST(etotal, 1, MPI_REAL, master, &
      &      MPI_COMM_WORLD, ierr)
-      call MPI_BCAST(etotal_old, 1, MPI_DOUBLE_PRECISION, master, &
+      call MPI_BCAST(etotal_old, 1, MPI_REAL, master, &
      &      MPI_COMM_WORLD, ierr)
 !     broadcast fpair
       call MPI_BCAST(f_pair, jmax*kmax, MPI_DOUBLE_PRECISION, master,&
@@ -352,6 +352,7 @@
       integer j, k
       double precision Ed_temp
 
+
       do 10 k=1, nr
 !     collect ddh from slave nodes to master node
          call MPI_REDUCE(Ed_ref(k), Ed_temp, 1, MPI_DOUBLE_PRECISION,&
@@ -361,6 +362,7 @@
      &        MPI_SUM, master, MPI_COMM_WORLD, ierr)
          if(myid.eq.master) Ed_in(k) = Ed_temp
 
+         !call MPI_barrier(MPI_COMM_WORLD, ierr) ! synchronization
          do 20 j=1, nz
 !           collect ecens to master node (previously done in imcgen)
             if((ncycle.le.1).or.(fp_sw.eq.0)) then
@@ -398,13 +400,13 @@
 !
       do 10 n = 1, nmu
          do 20 lgp=1,nph_lc
-!            fout(n,lgp) = 0.d0 
+           if(myid.eq.master) edout(n,lgp) = 0.d0
             call MPI_REDUCE(edout(n,lgp), temporary, 1, &
      &           MPI_DOUBLE_PRECISION, MPI_SUM, master, MPI_COMM_WORLD, &
      &           ierr)
             if(myid.eq.master) edout(n,lgp) = temporary
  20      continue
-         do 30 lgp=1, nphomax
+         do 30 lgp=1, nphtotal !nphomax
             if(myid.eq.master) fout(n,lgp) = 0.d0
             call MPI_REDUCE(fout(n,lgp), temporary, 1, &
      &           MPI_DOUBLE_PRECISION, MPI_SUM, master, MPI_COMM_WORLD, &

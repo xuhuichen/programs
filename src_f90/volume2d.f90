@@ -351,6 +351,7 @@
 !         Xuhui 6/1/09; deactivated any spectrum except synchrotron
 !            Eloss_cy(j, k) = Eloss_cy(j, k) + j_cy*E*(dE - 1.d0)
          else
+            !write(*,*)'kappa =',kappa_tot(i,j,k),'at i=',i
             x = E/T_keV
             tau_tot = kappa_tot(i, j, k)*l_min
             if (x.lt.1.d2) then

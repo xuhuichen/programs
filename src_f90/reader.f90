@@ -497,10 +497,7 @@
          write(4, 223) fp_sw
       endif
 !
-      read(nin, 100) buffer, cf_sentinel
-!      if (cf_sentinel.eq.1) then
-!         write(4, *)
-!         write(4, 226)
+      read(nin, 100) buffer, nt_ramp
          read(nin,110) buffer, r_flare
          read(nin,110) buffer, z_flare
          read(nin,110) buffer, t_flare
@@ -508,14 +505,8 @@
          read(nin,110) buffer, sigma_z
          read(nin,110) buffer, sigma_t
          read(nin,110) buffer, flare_amp
-      if (cf_sentinel.eq.1) then
-         write(4, *)
-         write(4, 226)
-         write(4, 227) r_flare
-         write(4, 228) z_flare
-         write(4, 229) t_flare
-         write(4, 233) sigma_t
-      else
+
+         write(4,'("turbulence decaying time scale [dt]:", i3)') nt_ramp
          write(4, 224)
          r_flare = 0.d0
          z_flare = 0.d0
@@ -524,7 +515,7 @@
 !         sigma_z = 1.d0
          sigma_t = 1.d0
 !         flare_amp = 0.d0
-      endif
+
          write(4, 231) sigma_r
          write(4, 232) sigma_z
          write(4, 234) flare_amp

@@ -94,7 +94,7 @@
 !     integers
 !
 !     common block i_flare
-      call MPI_ADDRESS(cf_sentinel, start_address, ierr)
+      call MPI_ADDRESS(nt_ramp, start_address, ierr)
       displacements(1) = 0
       lengths(1) = 1
       types(1) = MPI_INTEGER
@@ -318,12 +318,16 @@
       displacements(49) = address - start_address
       lengths(49) = num_nt
       types(49) = MPI_DOUBLE_PRECISION
+      call MPI_ADDRESS(r_acc_peak, address, ierr)
+      displacements(50) = address - start_address
+      lengths(50) = 1
+      types(50) = MPI_DOUBLE_PRECISION
 
 !
-      call MPI_TYPE_STRUCT(49, lengths, displacements, types, &
+      call MPI_TYPE_STRUCT(50, lengths, displacements, types, &
      &     setup_bcast_type, ierr)
       call MPI_TYPE_COMMIT(setup_bcast_type, ierr)
-      call MPI_BCAST(cf_sentinel, 1, setup_bcast_type,&
+      call MPI_BCAST(nt_ramp, 1, setup_bcast_type,&
      &      master, MPI_COMM_WORLD, ierr)
 !
 !
