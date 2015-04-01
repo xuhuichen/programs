@@ -497,7 +497,7 @@
          write(4, 223) fp_sw
       endif
 !
-      read(nin, 100) buffer, nt_ramp
+      read(nin, 102) buffer, nt_ramp
          read(nin,110) buffer, r_flare
          read(nin,110) buffer, z_flare
          read(nin,110) buffer, t_flare
@@ -506,7 +506,7 @@
          read(nin,110) buffer, sigma_t
          read(nin,110) buffer, flare_amp
 
-         write(4,'("turbulence decaying time scale [dt]:", i3)') nt_ramp
+         write(4,'("turbulence decaying time scale [dt]:", i10)') nt_ramp
          write(4, 224)
          r_flare = 0.d0
          z_flare = 0.d0

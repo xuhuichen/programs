@@ -357,10 +357,11 @@
 !      got the trldb, the travel length to the boundary.
 !______________________________________________________________________________
        kappa_ic=kappa_ic+dmin1(trldb,dcen)*sigsc
-       if(ncycle.eq.65.and.jph.eq.10.and.kph.eq.1.and.&
+       if(ncycle.eq.410.and.jph.eq.10.and.kph.eq.1.and.&
      &  xnu.gt.1e-3.and.xnu.lt.3e-3)write(*,*)'kappa_ic=',kappa_ic
        if(kappa_ic*split1.gt.0.5d0)then
          write(*,*)'optically not thin enough, reduce split1'
+         write(*,*)'kappa_ic',kappa_ic,'xnu=',xnu
          stop
        endif
 !_______________________________________________________________________________

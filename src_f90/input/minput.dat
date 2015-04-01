@@ -1,0 +1,14 @@
+  0. Current MHD time stop                                     currenttimestop = 0.0000000E+00
+  1. Electron temperature in zone [keV]                                    tea = 0.1000000E+02
+  2. Proton temperature in zone [keV]                                      tna = 0.1000000E+03
+  3. Particle density in zone [cm^(-3)]                                    n_e = 0.5000000E-01
+  4. Magn. field sent. (0 = spec., 1 = ep. w. el., 2 = ep. w. pr.)   ep_switch = 0
+  5. Magnetic field [G]                                                B_field = 0.3000000E+00
+  6. The angle between the helical magnetic field and z                theta_b = 0.1000000E+03
+  7. Maxwellian fraction in zone                                         amxwl = 0.0000000E+00
+  8. Low-energy cut-off of nonthermal electron population:                gmin = 0.1000000E+01
+  9. High-energy cut-off of nonthermal electron population:               gmax = 0.3300000E+02
+  10. Non-thermal electron spectral index:                               p_nth = 0.1100000E+01
+  11. Turbulence sp.index                                          q_turb(j,k) = 0.1666667E+01
+  12. Turbulence Level (deltaB/B0)^2                            turb_lev (j,k) = 0.1000000E-19
+  13. Acceleratin time scale (Z/c)                                 r_acc (j,k) = 0.3000000E+00

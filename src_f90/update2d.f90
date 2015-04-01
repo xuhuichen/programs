@@ -81,7 +81,7 @@
       double precision fcorr_coul, f_disp_corr
 !     particle diffusion
       double precision diff_z(0:jmax,kmax,num_nt),diff_r(jmax,kmax,num_nt), escape_total,var_scale,&
-     &                 grad_ne(num_nt), fnt_tot(num_nt), ne_tot, ne_ave
+     &                 grad_ne(num_nt), fnt_tot(num_nt), f_escape(num_nt), ne_tot, ne_ave
       double precision r_acc_copy(jmax,kmax), fibran, acc_ramp, acc_max(jmax,kmax)
 !
 
@@ -225,12 +225,15 @@
 !       sweeping of ambient matter at the j=1 bottom boundary
 !       the sweep compensates the particle number lost by escape
 !       unit: s^-1 cm^-3
+        f_escape(:) = 0.d0
         escape_total = 0.d0
          do i = 1, num_nt-1
           do k = 1, nr
+            f_escape(i) = f_escape(i) + diff_z(nz,k,i)-diff_z(0,k,i)
             escape_total = escape_total+(diff_z(nz,k,i)-diff_z(0,k,i))*(gnt(i+1)-gnt(i))
           enddo
           do j = 1, nz
+            f_escape(i) = f_escape(i) + diff_z(j,nr,i)
             escape_total = escape_total+diff_r(j,nr,i)*(gnt(i+1)-gnt(i))
           enddo
          enddo   ! sum up of boundary particle escape
@@ -259,7 +262,7 @@
       nr_acc=2
       nz_acc=2
       acc_ramp = dexp(1.d0/nt_ramp)  !1.5d0**(1.d0/12.d0)
-      acc_max(:,:) = 4.d2*r_acc_peak
+      acc_max(:,:) = 4.d2*r_acc_peak !/(1.d0-dexp(-1.d0/nz_acc/acc_prob/nt_ramp))
       if(turb_sw.eq.1)then
        if(mod(ncycle-1,nt_ramp).eq.0)then
 !       single zones in the center have random chance to accelerate
@@ -288,7 +291,7 @@
           if(fibran().lt.acc_prob_local(j,1))then
             do j_acc=j,j+nz_acc-1
               do k=1,nr_acc
-                r_acc(j_acc,k)=1./(1./r_acc(j_acc,k)+1./r_acc_peak)
+                r_acc(j_acc,k)=1./(1./r_acc(j_acc,k)+1./r_acc_peak*(1.d0-dexp(-1.d0/nz_acc/acc_prob/nt_ramp)))
                 write(*,*)'r_acc(j,k)=',j_acc,k,r_acc(j_acc,k)
               enddo
             enddo
@@ -413,10 +416,10 @@
          write(fmtele,'("("a9","i4"e14.7)")'),'"#theta="',nz*nr
          write(nunit_fnt, fmtele)&
      &        (((theta_local(j,k)), k=1,nr), j=1,nz)
-         write(fmtele,'("("i4"e14.7)")'),nz*nr+1
+         write(fmtele,'("("i4"e14.7)")'),nz*nr+2
          do i = 1, num_nt
            write(nunit_fnt,fmtele)(((dmax1(1.d-30,f_nt(j,k,i)*n_e(j,k))), k=1,nr), j=1,nz),&
-     &           dmax1(1.d-30,fnt_tot(i))
+     &           dmax1(1.d-30,fnt_tot(i)), dmax1(1.d-30,f_escape(i))
          enddo
          close(nunit_fnt)
 
@@ -1561,13 +1564,13 @@
      &         .or.(pick_sw.eq.3.and.j.eq.(nz/6+1).and.k.le.nr*2/3) &
 !     1         .or.(pick_sw.eq.3.and.j.eq.(nz/6+1))&
      &         .or.(pick_sw.eq.4.and.(j.eq.nz/2+1.or.j.eq.nz/2).and.k.le.2)&
-     &         .or.(pick_sw.eq.5.and.r_acc(j,k).lt.dexp(1.d0)*r_acc_peak))then
+     &         .or.(pick_sw.eq.5.and.r_acc(j,k).lt.dexp(1.d0)*100*r_acc_peak))then
 !          particle sweep at the lower boundary
                inj_rho = sweep*d_t
            else
              inj_rho = 0.d0
            endif
-           if(pick_sw.eq.5)inj_rho = inj_rho*r_acc_peak/r_acc(j,k)
+           if(pick_sw.eq.5)inj_rho = inj_rho*(r_acc_peak/r_acc(j,k))**15
            if(inj_switch.eq.6.and.k.le.int(sigma_r/dr+0.5d0))then
              if((time+t_fp-inj_t).gt.(j-1)*dz/inj_v.and.&
      &       (time+t_fp-inj_t).lt.(j-1+int(sigma_z/dz+0.5d0))*dz/inj_v)then

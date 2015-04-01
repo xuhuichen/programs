@@ -4,7 +4,7 @@ program main
  character(len=81) buffer
  integer mhdtimestepmax,nr,nz
  integer ntime,tbbu(1,9),tbbl(1,9),spec_switch,nphreg,nmu,nph_lc,nphbins(9),nst,rseed,rand_switch,&
-    cr_sent,upper_sent,dh_sentinel,pair_switch,T_const,cf_sentinel,&
+    cr_sent,turb_sw,pair_switch,T_const,cf_sentinel,&
     inj_switch,g2var_switch,esc_sw,pick_sw,split2,split3
  integer i,j,k, m, t, nin
  character(len=79) filename
@@ -12,7 +12,7 @@ program main
  character(len=3) xi
  character(len=30) u_fname(1,9),l_fname(1,9),spname,phname,lcname(1),eventfile,temp_file
  double precision tea,tna,n_e,B_input,B_field,theta_b,amxwl,gmin,gmax,p_nth,q_turb,turb_lev,r_acc,&
-                  acc_thick, acc_rwide, z_acc_dis
+                  acc_thick, acc_rwide, z_acc_dis, acc_prob
  double precision z(99),r(99),rmin,dz,dr,star_switch,Rstar,dist_star,tstop,mcdt,t0(9),t1(9),Ephmin(9),Ephmax(9),&
     Elcmin(9),Elcmax(9),&
     r_flare,z_flare,t_flare,sigma_r,sigma_z,sigma_t,flare_amp,r_esc,inj_g1,inj_g2,inj_p,inj_t,inj_L,dummy,&
@@ -54,23 +54,23 @@ program main
 
  tea=1.0d1
  tna=1.0d2
- n_e=3.d01
+ n_e=5.d-2
  ep_switch=0
- B_input=4.d-2
- theta_b=45.0d0
+ B_input=3.d-1
+ theta_b=1.0d2
  amxwl=0.0d0
- gmin=8.d1
- gmax=1.d3
- p_nth=4.0d0
+ gmin=1.d0
+ gmax=3.3d1
+ p_nth=1.1d0
  q_turb=1.66666667d0
  turb_lev=1.0d-20
- r_acc=2.34d-4
+ r_acc=0.3d00
  
 ! thinckness of the acceleration region
  acc_thick=2.0/20
  acc_rwide=2.0/15
  z_acc_dis=10.0/20
- inhom_acc = 0
+ inhom_acc = 3
 ! 0 is homogeneous, 1 is bottom acceleration, 2 is shear accleration at outer layer,
 ! 3 is acceleration at center zones
 ! 21 is with outer 1/3 no B. 22 is 21 with shear acceleration at outer layer
@@ -121,8 +121,8 @@ program main
       read(nin,102) buffer, rseed
       read(nin,102) buffer, rand_switch
       read(nin,100) buffer, cr_sent
-      read(nin,100) buffer, upper_sent
-      read(nin,100) buffer, dh_sentinel
+      read(nin,100) buffer, turb_sw
+      read(nin,110) buffer, acc_prob
       read(nin,100) buffer, pair_switch
       read(nin,100) buffer, T_const
       read(nin,100) buffer, cf_sentinel
